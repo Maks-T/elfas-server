@@ -10,6 +10,7 @@ class AppException
   const INTERNAL_SERVER_ERROR = 500;
 
   private const STATUS_FATAL = 'fatal';
+  private const STATUS_ERROR = 'error';
 
   public function __construct()
   {
@@ -20,8 +21,6 @@ class AppException
   {
     switch ($e->getCode()) {
       case self::ROURE_NOT_FOUND:
-
-        break;
       case self::BAD_REQUEST:
       case self::NOT_FOUND:
       case self::INTERNAL_SERVER_ERROR:
@@ -35,6 +34,24 @@ class AppException
   {
     http_response_code($e->getCode());
     echo $e->getMessage();
+  }
+
+  public static function ThrowRouteNotFound($message = 'Unknown server error', $methodCustomer = 'unknown method')
+  {
+
+    return throw new \Exception(
+      json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
+      AppException::ROURE_NOT_FOUND
+    );
+  }
+
+  public static function ThrowBadRequest($message = 'Unknown server error', $methodCustomer = 'unknown method')
+  {
+
+    return throw new \Exception(
+      json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
+      AppException::BAD_REQUEST
+    );
   }
 
   public static function ThrowInternalServerError($message = 'Unknown server error', $methodCustomer = 'unknown method')

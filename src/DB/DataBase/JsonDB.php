@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Elfas\DataBase;
+namespace Elfas\DB\DataBase;
 
 use Elfas\Exceptions\AppException;
 
@@ -67,7 +67,6 @@ class JsonDB
 
   public function deleteByField(string $field, string $value): ?object
   {
-
 
     foreach ($this->items as $index => $itemFind) {
       if (isset($itemFind->$field)) {
