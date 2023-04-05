@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule ^(.+)?$ /elfas-server/public/$1

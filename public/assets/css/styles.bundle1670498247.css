@@ -1,0 +1,25 @@
+/* style of interface.input.text */
+
+.js-login {
+
+}/* style of interface.input.password */
+
+/* style of interface.input.number */
+/* style of interface.input.multiply */
+
+.input-multiple {
+    border: 1px dodgerblue dashed;
+}/* style of interface.input.checkbox */
+/* style of interface.input.checkbox.multiple */
+
+.checkbox-mulltiple {
+    border: 1px dodgerblue dashed;
+}
+/* style of interface.input.radio */
+/* style of interface.select */
+/* style of interface.select.multiple */
+/* style of interface.form */
+
+.window--full-form {
+    box-shadow: 2px 2px 8px rgba(12, 65, 40, 0.58);
+}

@@ -1,0 +1,10 @@
+console.log('fw.interface.input.text.script.js load');
+console.log('fw.interface.input.password.script.js load');
+console.log('fw.interface.input.number.script.js load');
+console.log('fw.interface.input.multiply.script.js load');
+console.log('fw.interface.input.checkbox.script.js load');
+console.log('fw.interface.input.checkbox.multiple.js load');
+console.log('fw.interface.input.radio.script.js load');
+console.log('fw.interface.select.script.js load');
+console.log('fw.interface.select.multiple.script.js load');
+console.log('fw.interface.form.script.js load');
