@@ -8,6 +8,7 @@ class AppException
   const BAD_REQUEST = 400;
   const NOT_FOUND = 404;
   const INTERNAL_SERVER_ERROR = 500;
+  const SERVICE_UNAVIALABLE = 503;
 
   private const STATUS_FATAL = 'fatal';
   private const STATUS_ERROR = 'error';
@@ -24,6 +25,7 @@ class AppException
       case self::BAD_REQUEST:
       case self::NOT_FOUND:
       case self::INTERNAL_SERVER_ERROR:
+      case self::SERVICE_UNAVIALABLE:
       default:
         $this->sendMessage($e);
         break;
@@ -54,6 +56,23 @@ class AppException
     );
   }
 
+  public static function ThrowResourceNotFound($message = 'Unknown server error', $methodCustomer = 'unknown method')
+  {
+
+    return throw new \Exception(
+      json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
+      AppException::NOT_FOUND
+    );
+  }
+
+  public static function ThrowServiceUnavailable($message = 'Unknown server error', $methodCustomer = 'unknown method')
+  {
+
+    return throw new \Exception(
+      json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
+      AppException::SERVICE_UNAVIALABLE
+    );
+  }
   public static function ThrowInternalServerError($message = 'Unknown server error', $methodCustomer = 'unknown method')
   {
 

@@ -11,6 +11,7 @@ use Elfas\Services\UserService;
 
 class UserController extends Controller
 {
+
   private UserService $userService;
 
   private UserRepository $userRepository;
@@ -24,28 +25,34 @@ class UserController extends Controller
   public function create(): void
   {
     $userData = $this->request->getData();
+    echo json_encode($userData);
     $this->checkUserData($userData);
     if (isset($userData['id'])) {
       unset($userData['id']);
     }
 
-    //$userData['password'] = $this->serviceJWT->createTokenByPassword($userData['password']);
+    $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT, ['PSW_SECRET'=> $_ENV['PSW_SECRET']]);
     $userModel = new User($userData);
     $user = $this->userRepository->createUser($userModel);
 
     if ($user) {
-      /* $this->userService->setUserCookies($user);
-      $this->userService->sendSuccessMessage($user);*/
-
-      return;
+      //$this->userService->setUserCookies($user);
+      $this->userService->sendMsgUserCreated($user);
     }
+
+    AppException::ThrowServiceUnavailable('For some reason, the user is not created', __METHOD__);
+
   }
 
   public function get(): void
   {
     $user = $this->userRepository->getUserById($_GET['id']);
-    /*  $this->userService->isUserNotFound($user);
-    $this->userService->sendSuccessMessage($user);*/
+    //  $this->userService->isUserNotFound($user);
+    if ($user) {
+      $this->userService->sendMsgUserGot($user);
+    }
+
+    AppException::ThrowResourceNotFound("The user with id=$user->id does not exist", __METHOD__);
   }
 
   public function update(): void
@@ -53,15 +60,27 @@ class UserController extends Controller
     $userData = $this->request->getData();
     $userModel = new User($userData);
     $user = $this->userRepository->updateUserById($userModel->id, $userModel);
-    /*  $this->userService->isUserNotFound($user);
-    $this->userService->sendSuccessMessage($user);*/
+    //  $this->userService->isUserNotFound($user);
+
+    if ($user) {
+      $this->userService->sendMsgUserUpdated($user);
+    }
+
+    AppException::ThrowResourceNotFound("The user with id=$user->id does not exist", __METHOD__);
+
   }
 
   public function delete(): void
   {
     $user = $this->userRepository->deleteUserById($_GET['id']);
-    /*  $this->userService->isUserNotFound($user);
-    $this->userService->sendSuccessMessage($user, 204);*/
+    //  $this->userService->isUserNotFound($user);
+    $this->userService->send($user, 204);
+
+    if ($user) {
+      $this->userService->sendMsgUserDeleted($user);
+    }
+
+    AppException::ThrowResourceNotFound("The user with id=$user->id does not exist", __METHOD__);
   }
 
   public function checkUserData($data): void

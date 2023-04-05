@@ -12,6 +12,7 @@ class Router
 
   public function register(string $requestMethod, string $route, array $action): self
   {
+
     $this->routes[$requestMethod][$route] = $action;
 
     return $this;
@@ -45,14 +46,13 @@ class Router
     return $this;
   }
 
-
-  /**
-   * @throws \Exception
-   */
-
   public function resolve(string $requestUri, string $requestMethod)
   {
     $route = explode('?', $requestUri)[0];
+echo  $requestUri;
+    echo  $requestMethod;
+      echo json_encode($this->routes);
+
     $action = $this->routes[$requestMethod][$route] ?? null;
 
     if (!$action) {
@@ -67,6 +67,7 @@ class Router
       header("Content-Type: $contentType");
 
       if (method_exists($class, $method)) {
+
         return call_user_func_array([$class, $method], []);
       }
     }

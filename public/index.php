@@ -5,12 +5,15 @@ declare(strict_types=1);
 require './../src/init.php';
 
 use Elfas\App;
+use Elfas\Controllers\UserController;
 use Elfas\Exceptions\AppException;
 use Elfas\Router;
 
+//$_SERVER['REQUEST_URI'] = str_replace( $_SERVER['REQUEST_URI'], '\server-elfas', '');
+
 new AppException(); //creating an instance of an error handler
 
-try {
+
   new App();
 
   $router = new Router();
@@ -19,7 +22,6 @@ try {
   $router->post('/user', [UserController::class, 'create', 'application/json']);
   $router->put('/user', [UserController::class, 'update', 'application/json']);
   $router->delete('/user', [UserController::class, 'delete', 'application/json']);
-} catch (\Throwable $e) {
 
-  AppException::ThrowInternalServerError();
-}
+  $router->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD']));
+

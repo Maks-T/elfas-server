@@ -5,56 +5,52 @@ declare(strict_types=1);
 namespace Elfas\Services;
 
 use Elfas\DB\Models\User;
-use Elfas\Exceptions\AppException;
 
 class UserService
 {
-  public function sendSuccessMessage(User $user, $code = 200)
+  private const STATUS_SUCCESS = 'success';
+
+  public function sendMsgUserCreated(User $user)
   {
-    http_response_code($code);
+    http_response_code(201);
 
     echo json_encode([
-      'status' => 'success',
+      'status' => self::STATUS_SUCCESS,
+      'message' => 'The user has been successfully created',
       'user' => $user->response()
     ]);
   }
 
-  public function isUserNotFound(?User $user)
+  public function sendMsgUserUpdated(User $user)
   {
-    if (!$user) {
-      throw new \Exception(
-        json_encode(['status' => 'error', 'message' => "User with id='{$_GET['id']}' doesn't exist"]),
-        AppException::NOT_FOUND
-      );
-    }
+    http_response_code(200);
+
+    echo json_encode([
+      'status' => self::STATUS_SUCCESS,
+      'message' => 'The user has been successfully updated',
+      'user' => $user->response()
+    ]);
   }
 
-  public function isUserNotFoundByLogin(?User $user)
+  public function sendMsgUserDeleted(User $user)
   {
-    if (!$user) {
-      throw new \Exception(
-        json_encode([
-          'status' => 'error',
-          'errors' => [
-            'login' => "A user with this login does not exist!",
-          ]
-        ]),
-        AppException::NOT_FOUND
-      );
-    }
+    http_response_code(204);
+/*
+    echo json_encode([
+      'status' => self::STATUS_SUCCESS,
+      'message' => 'The user has been successfully deleted',
+      'user' => $user->response()
+    ]);*/
   }
 
-  public function isPasswordInvalid()
+  public function sendMsgUserGot(User $user)
   {
+    http_response_code(200);
 
-    throw new \Exception(
-      json_encode([
-        'status' => 'error',
-        'errors' => [
-          'password' => "Password is invalid!",
-        ]
-      ]),
-      AppException::BAD_REQUEST
-    );
+    echo json_encode([
+      'status' => self::STATUS_SUCCESS,
+      'user' => $user->response()
+    ]);
   }
+
 }
