@@ -49,9 +49,6 @@ class Router
   public function resolve(string $requestUri, string $requestMethod)
   {
     $route = explode('?', $requestUri)[0];
-echo  $requestUri;
-    echo  $requestMethod;
-      echo json_encode($this->routes);
 
     $action = $this->routes[$requestMethod][$route] ?? null;
 

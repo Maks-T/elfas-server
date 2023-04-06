@@ -9,19 +9,18 @@ use Elfas\Controllers\UserController;
 use Elfas\Exceptions\AppException;
 use Elfas\Router;
 
-//$_SERVER['REQUEST_URI'] = str_replace( $_SERVER['REQUEST_URI'], '\server-elfas', '');
+
+$_SERVER['REQUEST_URI'] = str_replace('/elfas-server', '', $_SERVER['REQUEST_URI']);
 
 new AppException(); //creating an instance of an error handler
 
+new App();
 
-  new App();
+$router = new Router();
 
-  $router = new Router();
+$router->get('/user', [UserController::class, 'get', 'application/json']);
+$router->post('/user', [UserController::class, 'create', 'application/json']);
+$router->put('/user', [UserController::class, 'update', 'application/json']);
+$router->delete('/user', [UserController::class, 'delete', 'application/json']);
 
-  $router->get('/user', [UserController::class, 'get', 'application/json']);
-  $router->post('/user', [UserController::class, 'create', 'application/json']);
-  $router->put('/user', [UserController::class, 'update', 'application/json']);
-  $router->delete('/user', [UserController::class, 'delete', 'application/json']);
-
-  $router->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD']));
-
+$router->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD']));

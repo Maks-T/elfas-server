@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Elfas\DB\Repositories;
 
-use Elfas\DB\Model\User;
+use Elfas\DB\Models\User;
 use Elfas\DB\DataBase\JsonDB;
 
 class UserRepository
@@ -50,6 +50,16 @@ class UserRepository
     $findUser = $this->getUserById($id);
 
     if ($findUser) {
+
+      foreach ((array)$findUser as $prop => $value) {
+        echo '$prop = ' . $prop . ' $value = ' . $value . '<br>';
+      }
+      $user->name ?? $user->name = $findUser->name;
+      $user->login ?? $user->login = $findUser->login;
+      $user->email ?? $user->email = $findUser->email;
+      $user->password ?? $user->email = $findUser->password;
+      $user->id = $findUser->id;
+
       return $this->jsonDB->updateByField('id', $id, $user);
     }
 

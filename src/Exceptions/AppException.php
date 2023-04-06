@@ -32,7 +32,7 @@ class AppException
     }
   }
 
-  private function sendMessage(\Exception $e)
+  private function sendMessage(\Exception | \Error $e)
   {
     http_response_code($e->getCode());
     echo $e->getMessage();
