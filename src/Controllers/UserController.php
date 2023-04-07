@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Elfas\Controllers;
 
 use Elfas\DB\Models\User;
+use Elfas\DB\Repositories\AuthRepository;
 use Elfas\DB\Repositories\UserRepository;
 use Elfas\Exceptions\AppException;
 use Elfas\Services\UserService;
@@ -14,12 +15,15 @@ class UserController extends Controller
 
   private UserService $userService;
 
+  private AuthRepository $authRepository;
+
   private UserRepository $userRepository;
 
   public function __construct()
   {
     parent::__construct();
     $this->userService = new UserService();
+    $this->authRepository = new AuthRepository();
     $this->userRepository = new UserRepository();
   }
 
@@ -38,7 +42,8 @@ class UserController extends Controller
 
     if ($user) {
 
-      $this->userService->sendMsgUserCreated($user);
+      $publicKey = $this->authRepository->getPublicKey($user->id,  $userData['clientKey']);
+      $this->userService->sendMsgUserCreated($user, $publicKey);
       return;
     }
 

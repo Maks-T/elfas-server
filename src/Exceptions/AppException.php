@@ -18,7 +18,7 @@ class AppException
     set_exception_handler(array($this, 'exception_handler'));
   }
 
-  public function exception_handler($e)
+  public function exception_handler($e): void
   {
     switch ($e->getCode()) {
       case self::ROURE_NOT_FOUND:
@@ -32,7 +32,7 @@ class AppException
     }
   }
 
-  private function sendMessage(\Exception | \Error $e)
+  private function sendMessage(\Exception | \Error $e): void
   {
     http_response_code($e->getCode());
     echo $e->getMessage();
@@ -41,7 +41,7 @@ class AppException
   public static function ThrowRouteNotFound($message = 'Unknown server error', $methodCustomer = 'unknown method')
   {
 
-    return throw new \Exception(
+    throw new \Exception(
       json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
       AppException::ROURE_NOT_FOUND
     );
@@ -50,7 +50,7 @@ class AppException
   public static function ThrowBadRequest($message = 'Unknown server error', $methodCustomer = 'unknown method')
   {
 
-    return throw new \Exception(
+    throw new \Exception(
       json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
       AppException::BAD_REQUEST
     );
@@ -59,7 +59,7 @@ class AppException
   public static function ThrowResourceNotFound($message = 'Unknown server error', $methodCustomer = 'unknown method')
   {
 
-    return throw new \Exception(
+    throw new \Exception(
       json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
       AppException::NOT_FOUND
     );
@@ -68,7 +68,7 @@ class AppException
   public static function ThrowServiceUnavailable($message = 'Unknown server error', $methodCustomer = 'unknown method')
   {
 
-    return throw new \Exception(
+    throw new \Exception(
       json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
       AppException::SERVICE_UNAVIALABLE
     );
@@ -76,7 +76,7 @@ class AppException
   public static function ThrowInternalServerError($message = 'Unknown server error', $methodCustomer = 'unknown method')
   {
 
-    return throw new \Exception(
+    throw new \Exception(
       json_encode(['status' => self::STATUS_FATAL, 'message' => $message, 'method' => $methodCustomer]),
       AppException::INTERNAL_SERVER_ERROR
     );

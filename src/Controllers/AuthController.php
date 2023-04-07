@@ -6,16 +6,17 @@ namespace Elfas\Controllers;
 
 use Elfas\DB\Models\User;
 use Elfas\DB\Repositories\UserRepository;
+use Elfas\DB\Repositories\AuthRepository;
 use Elfas\Exceptions\AppException;
 use Elfas\Services\UserService;
-use Elfas\Services\AuthService;
+
 
 class AuthController extends Controller
 {
 
   private UserService $userService;
 
-  private AuthService $authService;
+  private AuthRepository $authRepository;
 
   private UserRepository $userRepository;
 
@@ -23,15 +24,20 @@ class AuthController extends Controller
   {
     parent::__construct();
     $this->userService = new UserService();
-    $this->authService = new AuthService();
+    $this->authRepository = new AuthRepository();
     $this->userRepository = new UserRepository();
   }
 
   public function login(): void
   {
 
-    ['login' => $login, 'password' => $password] = $this->request->getData();
+    $loginData = $this->request->getData();
 
+    $this->checkLoginData($loginData);
+
+    ['login' => $login, 'password' => $password, 'clientKey' => $clientKey] = $loginData;
+
+    /** @var User $user */
     $user = $this->userRepository->getUserByLogin($login);
 
     if (!$user) {
@@ -41,9 +47,29 @@ class AuthController extends Controller
     //ToDo create verify password
     if (password_verify($password, $user->password)) {
 
-      $this->authService->getPublicKey($user->id);
-      $this->userService->sendMsgUserGot($user);
+      $publicKey = $this->authRepository->getPublicKey($user->id, $clientKey);
+      $this->userService->sendMsgUserGot($user, $publicKey);
       return;
     }
   }
+
+  private function checkLoginData(array $loginData)
+  {
+    $errors = [];
+
+    if (!array_key_exists('login', $loginData)) {
+      $errors[] = 'login not transmitted';
+    }
+    if (!array_key_exists('password', $loginData)) {
+      $errors[] = 'password not transmitted';
+    }
+    if (!array_key_exists('clientKey', $loginData)) {
+      $errors[] = 'clientKey not transmitted';
+    }
+
+    if (count($errors)) {
+      AppException::ThrowBadRequest($errors, __METHOD__);
+    }
+  }
+
 }

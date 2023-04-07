@@ -8,14 +8,12 @@ class Auth
 {
   public string $userId;
 
-  public AuthConnect $connections = [];
+  /** @var AuthConnection[] $connections */
+  public array $connections = [];
 
-  public function __construct(string $userId)
+  public function __construct(array $authData)
   {
-    $this->$userId = $userId;  
-  }
-
-  public function response()
-  {
+    $this->userId = $authData['userId'];
+    isset($authData['connections']) ? $this->connections = (array)$authData['connections'] : [];
   }
 }

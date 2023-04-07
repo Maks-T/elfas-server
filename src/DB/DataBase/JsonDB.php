@@ -22,6 +22,7 @@ class JsonDB
     $itemsJson = json_decode($json) ?? [];
 
     foreach ($itemsJson as $itemJson) {
+
       $this->items[] = new $class((array)$itemJson);
     }
   }
