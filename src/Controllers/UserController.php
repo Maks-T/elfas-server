@@ -32,7 +32,7 @@ class UserController extends Controller
       unset($userData['id']);
     }
 
-    $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT, ['PSW_SECRET' => $_ENV['PSW_SECRET']]);
+    $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
     $userModel = new User($userData);
     $user = $this->userRepository->createUser($userModel);
 
@@ -83,7 +83,6 @@ class UserController extends Controller
   {
     $userId = $_GET['id'];
     $user = $this->userRepository->deleteUserById($userId);
-    //  $this->userService->isUserNotFound($user);
 
     if ($user) {
       $this->userService->sendMsgUserDeleted($user);
