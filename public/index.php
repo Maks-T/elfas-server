@@ -25,5 +25,6 @@ $router->put('/user', [UserController::class, 'update', 'application/json']);
 $router->delete('/user', [UserController::class, 'delete', 'application/json']);
 
 $router->post('/auth', [AuthController::class, 'login', 'application/json']);
+$router->get('/auth', [AuthController::class, 'loginByKeys', 'application/json']);
 
 $router->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD']));

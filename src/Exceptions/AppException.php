@@ -6,9 +6,10 @@ class AppException
 {
   const ROURE_NOT_FOUND = 1;
   const BAD_REQUEST = 400;
+  const FORBIDDEN = 403;
   const NOT_FOUND = 404;
   const INTERNAL_SERVER_ERROR = 500;
-  const SERVICE_UNAVIALABLE = 503;
+  const SERVICE_UNAVAILABLE = 503;
 
   private const STATUS_FATAL = 'fatal';
   private const STATUS_ERROR = 'error';
@@ -20,16 +21,7 @@ class AppException
 
   public function exception_handler($e): void
   {
-    switch ($e->getCode()) {
-      case self::ROURE_NOT_FOUND:
-      case self::BAD_REQUEST:
-      case self::NOT_FOUND:
-      case self::INTERNAL_SERVER_ERROR:
-      case self::SERVICE_UNAVIALABLE:
-      default:
-        $this->sendMessage($e);
-        break;
-    }
+    $this->sendMessage($e);
   }
 
   private function sendMessage(\Exception | \Error $e): void
@@ -44,6 +36,15 @@ class AppException
     throw new \Exception(
       json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
       AppException::ROURE_NOT_FOUND
+    );
+  }
+
+  public static function ThrowForbidden($message = 'Unknown server error', $methodCustomer = 'unknown method')
+  {
+
+    throw new \Exception(
+      json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
+      AppException::FORBIDDEN
     );
   }
 
@@ -70,7 +71,7 @@ class AppException
 
     throw new \Exception(
       json_encode(['status' => self::STATUS_ERROR, 'message' => $message, 'method' => $methodCustomer]),
-      AppException::SERVICE_UNAVIALABLE
+      AppException::SERVICE_UNAVAILABLE
     );
   }
   public static function ThrowInternalServerError($message = 'Unknown server error', $methodCustomer = 'unknown method')

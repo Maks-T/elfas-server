@@ -53,6 +53,35 @@ class AuthController extends Controller
     }
   }
 
+  public function loginByKeys(): void
+  {
+
+    $keysData = $this->request->getData();
+
+    $this->checkKeysData($keysData);
+
+    ['publicKey' => $publicKey, 'clientKey' => $clientKey, 'userId' => $userKey] = $keysData;
+
+    /** @var User $user */
+    $user = $this->userRepository->getUserById($userKey);
+
+    if (!$user) {
+      AppException::ThrowResourceNotFound("The user with id=$userKey does not exist", __METHOD__);
+    }
+
+    $publicKeyNew = $this->authRepository->checkKeys($userKey, $clientKey, $publicKey);
+
+    if ($publicKeyNew) {
+      $this->userService->sendMsgUserGot($user, $publicKeyNew);
+
+      return;
+    }
+
+    AppException::ThrowForbidden('Incorrect authorization keys were passed', __METHOD__);
+
+  }
+
+
   private function checkLoginData(array $loginData)
   {
     $errors = [];
@@ -66,6 +95,26 @@ class AuthController extends Controller
     if (!array_key_exists('clientKey', $loginData)) {
       $errors[] = 'clientKey not transmitted';
     }
+
+    if (count($errors)) {
+      AppException::ThrowBadRequest($errors, __METHOD__);
+    }
+  }
+
+  private function checkKeysData(array $keysData)
+  {
+    $errors = [];
+
+    if (!array_key_exists('publicKey', $keysData)) {
+      $errors[] = 'publicKey not transmitted';
+    }
+    if (!array_key_exists('clientKey', $keysData)) {
+      $errors[] = 'clientKey not transmitted';
+    }
+    if (!array_key_exists('userId', $keysData)) {
+      $errors[] = 'userId not transmitted';
+    }
+
 
     if (count($errors)) {
       AppException::ThrowBadRequest($errors, __METHOD__);

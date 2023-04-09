@@ -42,7 +42,7 @@ class UserController extends Controller
 
     if ($user) {
 
-      $publicKey = $this->authRepository->getPublicKey($user->id,  $userData['clientKey']);
+      $publicKey = $this->authRepository->getPublicKey($user->id, $userData['clientKey']);
       $this->userService->sendMsgUserCreated($user, $publicKey);
       return;
     }
@@ -88,6 +88,7 @@ class UserController extends Controller
   {
     $userId = $_GET['id'];
     $user = $this->userRepository->deleteUserById($userId);
+    $this->authRepository->deleteByUserId($userId);
 
     if ($user) {
       $this->userService->sendMsgUserDeleted($user);

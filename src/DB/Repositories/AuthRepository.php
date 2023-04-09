@@ -6,7 +6,6 @@ namespace Elfas\DB\Repositories;
 
 use Elfas\DB\DataBase\JsonDB;
 use Elfas\DB\Models\Auth;
-use Elfas\DB\Models\AuthConnection;
 
 class AuthRepository
 {
@@ -19,6 +18,11 @@ class AuthRepository
     $this->jsonDB = new JsonDB(self::FILE_PATH, Auth::class);
   }
 
+  public function deleteByUserId(string $userId)
+  {
+    $this->jsonDB->deleteByField('userId', $userId);
+  }
+
   public function getPublicKey(string $userId, string $clientKey): string
   {
 
@@ -27,28 +31,44 @@ class AuthRepository
 
     if ($findAuth) {
 
-      foreach ($findAuth->connections as $connection) {
+      $publicKey = $findAuth->getPublicKey($clientKey);
 
-        if ($connection->clientKey === $clientKey) {
-          $connection->lastConnect = date("F j, Y, g:i:s a");
-          $this->jsonDB->updateByField('userId', $userId, $findAuth);
+      if ($publicKey) {
+        $this->jsonDB->updateByField('userId', $findAuth->userId, $findAuth);
 
-          return $connection->publicKey;
-        }
+        return $publicKey;
       }
 
-      $authConnection = new AuthConnection($clientKey);
-      $findAuth->connections[] = $authConnection;
+      $authConnection = $findAuth->createConnection($clientKey);
       $this->jsonDB->updateByField('userId', $userId, $findAuth);
       return $authConnection->publicKey;
     }
 
-    $authConnection = new AuthConnection($clientKey);
+
     $auth = new Auth(['userId' => $userId]);
-    $auth->connections[] = $authConnection;
+    $authConnection = $auth->createConnection($clientKey);
     $this->jsonDB->create($auth);
 
     return $authConnection->publicKey;
+  }
+
+  public function checkKeys(string $userId, string $clientKey, string $publicKey, bool $updatePublicKey = true): ?string
+  {
+    /** @var Auth $findAuth */
+    $findAuth = $this->jsonDB->getByField('userId', $userId);
+
+    if ($findAuth) {
+
+      $publicKey = $findAuth->checkKeys($clientKey, $publicKey, $updatePublicKey);
+
+      if ($publicKey) {
+        $this->jsonDB->updateByField('userId', $findAuth->userId, $findAuth);
+
+        return $publicKey;
+      }
+
+    }
+    return null;
   }
 
 }
