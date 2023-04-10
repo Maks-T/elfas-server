@@ -27,13 +27,41 @@ class JsonDB
     }
   }
 
-  public function create(object $item): ?object
+  public function create(object $item): object
   {
 
     $this->items[] = $item;
     $this->saveItemsToFile(__METHOD__);
 
     return $item;
+  }
+
+  /**
+   * @param object[] $items
+   * @return object[]
+   */
+  public function createItems(array $items): array
+  {
+
+    $this->items[] = [...$this->items, ...$items];
+    $this->saveItemsToFile(__METHOD__);
+
+    return $items;
+  }
+
+  public function getSize(): int
+  {
+    return count($this->items);
+  }
+
+  public function getItems(int $count, int $start = 0): ?array
+  {
+    $length = count($this->items);
+
+    if ($count > $length - $start) {
+      $count = $length - $start;
+    }
+    return $count > 0 && $length > 0 ? array_slice($this->items, $start, $count) : [];
   }
 
   public function getByField(string $field, string $value): ?object
@@ -56,14 +84,14 @@ class JsonDB
     foreach ($this->items as $index => $itemFind) {
       if (isset($itemFind->$field)) {
         if ($itemFind->$field == $value) {
-
           $this->items[$index] = $item;
+          $this->saveItemsToFile(__METHOD__);
+          return $item;
         }
       }
     }
-    $this->saveItemsToFile(__METHOD__);
 
-    return $item ?? null;
+    return null;
   }
 
   public function deleteByField(string $field, string $value): ?object
@@ -74,13 +102,13 @@ class JsonDB
         if ($itemFind->$field == $value) {
           $item = $itemFind;
           array_splice($this->items, $index, 1);
+          $this->saveItemsToFile(__METHOD__);
+          return $item;
         }
       }
     }
 
-    $this->saveItemsToFile(__METHOD__);
-
-    return $item ?? null;
+    return null;
   }
 
   public function saveItemsToFile(string $methodCustomer)
