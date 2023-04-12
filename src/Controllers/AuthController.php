@@ -10,6 +10,7 @@ use Elfas\DB\Repositories\AuthRepository;
 use Elfas\Exceptions\AppException;
 use Elfas\Services\UserService;
 
+//ToDo auth Service
 
 class AuthController extends Controller
 {
@@ -78,7 +79,6 @@ class AuthController extends Controller
     }
 
     AppException::ThrowForbidden('Incorrect authorization keys were passed', __METHOD__);
-
   }
 
 
@@ -106,13 +106,13 @@ class AuthController extends Controller
     $errors = [];
 
     if (!array_key_exists('publicKey', $keysData)) {
-      $errors[] = 'publicKey not transmitted';
+      $errors[] = 'publicKey is not transmitted';
     }
     if (!array_key_exists('clientKey', $keysData)) {
-      $errors[] = 'clientKey not transmitted';
+      $errors[] = 'clientKey is not transmitted';
     }
     if (!array_key_exists('userId', $keysData)) {
-      $errors[] = 'userId not transmitted';
+      $errors[] = 'userId is not transmitted';
     }
 
 
@@ -120,5 +120,4 @@ class AuthController extends Controller
       AppException::ThrowBadRequest($errors, __METHOD__);
     }
   }
-
 }

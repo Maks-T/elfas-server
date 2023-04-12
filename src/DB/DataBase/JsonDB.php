@@ -54,6 +54,12 @@ class JsonDB
     return count($this->items);
   }
 
+  public function getAll(): ?array
+  {
+
+    return $this->items;
+  }
+
   public function getItems(int $count, int $start = 0): ?array
   {
     $length = count($this->items);
