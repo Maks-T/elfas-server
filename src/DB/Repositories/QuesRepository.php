@@ -13,7 +13,7 @@ class QuesRepository
 
   private JsonDb $jsonDB;
 
-  private string $curUserId;
+  private ?string $curUserId = null;
 
   public function __construct()
   {
@@ -25,7 +25,8 @@ class QuesRepository
       if (!is_dir(self::DIR_PATH)) {
         mkdir(self::DIR_PATH);
       }
-      $this->jsonDB = new JsonDB(self::DIR_PATH . $userId, Ques::class);
+
+      $this->jsonDB = new JsonDB(self::DIR_PATH . $userId . '.json', Ques::class);
       $this->curUserId = $userId;
     }
     return $this;

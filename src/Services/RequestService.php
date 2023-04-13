@@ -12,7 +12,7 @@ class RequestService
     $req = json_decode(file_get_contents('php://input')) ?? [];
     $data = [];
     foreach ($req as $field => $valueField) {
-      $data[$field] = trim($valueField);
+      $data[$field] = is_string($valueField) ? trim($valueField) : $valueField;
     }
 
     return $data;

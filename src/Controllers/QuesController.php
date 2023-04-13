@@ -27,7 +27,7 @@ class QuesController extends Controller
   {
     parent::__construct();
     $this->quesService = new QuesService();
-    $this->userRepository = new QuesRepository();
+    $this->quesRepository = new QuesRepository();
     $this->authRepository = new AuthRepository();
     $this->userRepository = new UserRepository();
   }
@@ -40,13 +40,18 @@ class QuesController extends Controller
 
     $quesModels = [];
 
-    foreach ($quesData as $ques) {
-      $this->checkQues($ques);
+    $this->checkQuesData($quesData);
+
+    foreach ($quesData['questions'] as $ques) {
+      $ques = (array)$ques;
+
+      $this->checkQuesCreate($ques);
+
       if (isset($ques['id'])) {
         unset($ques['id']);
       }
 
-      $quesModels = new Ques($ques);
+      $quesModels[] = new Ques($ques);
     }
 
     $questions = $this->quesRepository->createQuestions($userId, $quesModels);
@@ -87,7 +92,7 @@ class QuesController extends Controller
 
     $userId = $this->findUserByData($quesData)->id;
 
-    $this->checkQues($quesData);
+    $this->checkQuesUpdate($quesData);
 
     $quesModel = new Ques($quesData);
 
@@ -121,12 +126,11 @@ class QuesController extends Controller
 
   private function findUserByData($quesData): User
   {
-
     if (!array_key_exists('userId', $quesData)) {
       AppException::ThrowBadRequest('userId is not transmitted', __METHOD__);
     }
 
-    $userId = $quesData['UserId'] ?? null;
+    $userId = $quesData['userId'] ?? null;
 
     $user = $userId ? $this->userRepository->getUserById($userId) : null;
 
@@ -137,7 +141,24 @@ class QuesController extends Controller
     AppException::ThrowResourceNotFound("The user with id=$userId does not exist", __METHOD__);
   }
 
-  public function checkQues($ques): void
+  public function checkQuesData($quesData): void
+  {
+    $errors = [];
+
+    if (!array_key_exists('questions', $quesData)) {
+      $errors[] = 'questions is not transmitted';
+    } else {
+      if (!is_array($quesData['questions'])) {
+        $errors[] = 'questions is not array of question';
+      }
+    }
+
+    if (count($errors)) {
+      AppException::ThrowBadRequest($errors, __METHOD__);
+    }
+  }
+
+  public function checkQuesUpdate(array $ques): void
   {
     $errors = [];
 
@@ -148,7 +169,25 @@ class QuesController extends Controller
     if (!array_key_exists('en', $ques)) {
       $errors[] = 'phrase En is not transmitted';
     }
-    if (!array_key_exists('clientKey', $ques)) {
+
+    if (!array_key_exists('ru', $ques)) {
+      $errors[] = 'phrase Ru is not transmitted';
+    }
+
+    if (count($errors)) {
+      AppException::ThrowBadRequest($errors, __METHOD__);
+    }
+  }
+
+
+  public function checkQuesCreate(array $ques): void
+  {
+    $errors = [];
+
+    if (!array_key_exists('en', $ques)) {
+      $errors[] = 'phrase En is not transmitted';
+    }
+    if (!array_key_exists('ru', $ques)) {
       $errors[] = 'phrase Ru is not transmitted';
     }
 

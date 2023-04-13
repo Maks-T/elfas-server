@@ -24,13 +24,15 @@ class Ques
 
   public function __construct(array $quesData)
   {
+
     $this->id =
       !isset($quesData['id'])
       ?  uniqid()
       : $quesData['id'];
+
     $this->parentUserId = $quesData['parenUserId'] ?? null;
     $this->en = $quesData['en'];
-    $this->ru = (array)$quesData['ru'];
+    $this->ru = $quesData['ru'];
     $this->tr = $quesData['tr'] ?? null;
     $this->audioSrc = $quesData['audioSrc'] ?? null;
     $this->audioSrc = $quesData['level'] ?? null;

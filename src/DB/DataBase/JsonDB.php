@@ -18,12 +18,15 @@ class JsonDB
   public function __construct(string $path, string $class)
   {
     $this->path = $path;
-    $json = file_get_contents($this->path);
-    $itemsJson = json_decode($json) ?? [];
 
-    foreach ($itemsJson as $itemJson) {
+    if (file_exists($this->path)) {
+      $json = file_get_contents($this->path);
+      $itemsJson = json_decode($json) ?? [];
 
-      $this->items[] = new $class((array)$itemJson);
+      foreach ($itemsJson as $itemJson) {
+
+        $this->items[] = new $class((array)$itemJson);
+      }
     }
   }
 
@@ -43,7 +46,7 @@ class JsonDB
   public function createItems(array $items): array
   {
 
-    $this->items[] = [...$this->items, ...$items];
+    $this->items = [...$this->items, ...$items];
     $this->saveItemsToFile(__METHOD__);
 
     return $items;
@@ -120,8 +123,8 @@ class JsonDB
   public function saveItemsToFile(string $methodCustomer)
   {
     try {
-      $json = json_encode($this->items);
-      file_put_contents($this->path, $json);
+      $json = json_encode($this->items, JSON_UNESCAPED_UNICODE);
+      file_put_contents($this->path, $json, JSON_UNESCAPED_UNICODE);
     } catch (\Throwable $e) {
       AppException::ThrowInternalServerError(self::ERROR_SAVE_FILE, $methodCustomer);
     }
