@@ -52,8 +52,11 @@ class UserController extends Controller
 
   public function get(): void
   {
-    $userId = $_GET['id'];
-    $user = $this->userRepository->getUserById($userId);
+    $userData = $this->request->getData();
+
+    $userId = $userData['id'] ?? null;
+
+    $user = $userId ? $this->userRepository->getUserById($userId) : null;
 
     if ($user) {
       $this->userService->sendMsgUserGot($user);
@@ -66,27 +69,30 @@ class UserController extends Controller
   public function update(): void
   {
     //ToDo prohibit updating without a password
-    $userId = $_GET['id'];
-
-    $user = $this->userRepository->getUserById($userId);
 
     $userData = $this->request->getData();
-    $this->checkUserData($userData);
 
-    $userModel = new User($userData);
-    $user = $this->userRepository->updateUserById($userId, $userModel);
+    $userFinded = $this->findUserByData($userData);
 
-    if ($user) {
-      $this->userService->sendMsgUserUpdated($user);
-      return;
+    if ($userFinded) {
+      $this->checkUserData($userData);
+      $user = $this->userRepository->updateUserById($userFinded->id, $userFinded);
+
+      if ($user) {
+        $this->userService->sendMsgUserUpdated($user);
+        return;
+      }
     }
 
-    AppException::ThrowResourceNotFound("The user with id=$userId does not exist", __METHOD__);
+    AppException::ThrowServiceUnavailable('For some reason, the questions are not updated', __METHOD__);
   }
 
   public function delete(): void
   {
-    $userId = $_GET['id'];
+    $userData = $this->request->getData();
+
+    $userId = $this->findUserByData($userData)->id;
+
     $user = $this->userRepository->deleteUserById($userId);
     $this->authRepository->deleteByUserId($userId);
 
@@ -98,7 +104,24 @@ class UserController extends Controller
     AppException::ThrowResourceNotFound("The user with id=$userId  does not exist", __METHOD__);
   }
 
-  public function checkUserData($data): void
+  private function findUserByData($userData): User
+  {
+    if (!array_key_exists('id', $userData)) {
+      AppException::ThrowBadRequest('userId is not transmitted', __METHOD__);
+    }
+
+    $userId = $userData['id'];
+
+    $user = $this->userRepository->getUserById($userId);
+
+    if ($user) {
+      return $user;
+    }
+
+    AppException::ThrowResourceNotFound("The user with id=$userId does not exist", __METHOD__);
+  }
+
+  private function checkUserData($data): void
   {
     $errors = [];
 

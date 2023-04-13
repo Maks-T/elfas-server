@@ -10,13 +10,10 @@ use Elfas\DB\Repositories\QuesRepository;
 use Elfas\DB\Repositories\AuthRepository;
 use Elfas\DB\Repositories\UserRepository;
 use Elfas\Exceptions\AppException;
-use Elfas\Services\UserService;
 use Elfas\Services\QuesService;
 
 class QuesController extends Controller
 {
-
-  private UserService $userService;
 
   private QuesService $quesService;
 
@@ -29,7 +26,6 @@ class QuesController extends Controller
   public function __construct()
   {
     parent::__construct();
-    $this->userService = new UserService();
     $this->quesService = new QuesService();
     $this->userRepository = new QuesRepository();
     $this->authRepository = new AuthRepository();
@@ -40,11 +36,10 @@ class QuesController extends Controller
   {
     $quesData = $this->request->getData();
 
-    $this->checkQuesData($quesData);
-
-    $userId = $quesData['userId'];
+    $userId = $this->findUserByData($quesData)->id;
 
     $quesModels = [];
+
     foreach ($quesData as $ques) {
       $this->checkQues($ques);
       if (isset($ques['id'])) {
@@ -68,13 +63,13 @@ class QuesController extends Controller
   public function get(): void
   {
 
-    $this->checkQuesData($_GET);
+    $quesData = $this->request->getData();
 
-    $userId = $_GET['userId'];
+    $userId = $this->findUserByData($quesData)->id;
 
-    if (array_key_exists('count', $_GET)) {
-      $count = $_GET['count'];
-      $start = key_exists('start', $_GET) ? $_GET['start'] : 0;
+    if (array_key_exists('count', $quesData)) {
+      $count = $quesData['count'];
+      $start = key_exists('start', $quesData) ? $quesData['start'] : 0;
 
       $questions = $this->quesRepository->getQuestions($userId, $count, $start);
     } else {
@@ -88,25 +83,19 @@ class QuesController extends Controller
   {
     //ToDo prohibit updating without a password
 
-    $this->checkQuesData($_GET);
-
-    $userId = $_GET['id'];
-
     $quesData = $this->request->getData();
 
-    if (isset($quesData['id'])) {
-      unset($quesData['id']);
-    }
+    $userId = $this->findUserByData($quesData)->id;
 
     $this->checkQues($quesData);
 
     $quesModel = new Ques($quesData);
 
-    $questions = $this->quesRepository->updateQuestionById($userId, $quesModel);
+    $question = $this->quesRepository->updateQuestionById($userId, $quesData['id'], $quesModel);
 
-    if ($questions) {
+    if ($question) {
 
-      $this->quesService->sendMsgQuestionsCreated($questions);
+      $this->quesService->sendMsgQuestionUpdated($question);
       return;
     }
 
@@ -115,35 +104,46 @@ class QuesController extends Controller
 
   public function delete(): void
   {
-    $userId = $_GET['id'];
+    $quesData = $this->request->getData();
+
+    $userId = $this->findUserByData($quesData)->id;
+
     $user = $this->userRepository->deleteUserById($userId);
     $this->authRepository->deleteByUserId($userId);
 
     if ($user) {
-      $this->userService->sendMsgUserDeleted($user);
+      $this->quesService->sendMsgQuestionDeleted($user);
       return;
     }
 
     AppException::ThrowResourceNotFound("The user with id=$userId  does not exist", __METHOD__);
   }
 
-  public function checkQuesData($quesData): void
+  private function findUserByData($quesData): User
   {
+
     if (!array_key_exists('userId', $quesData)) {
       AppException::ThrowBadRequest('userId is not transmitted', __METHOD__);
     }
-    $userId = $quesData['userId'];
 
-    $user = $this->userRepository->getUserById($userId);
+    $userId = $quesData['UserId'] ?? null;
 
-    if (!$user) {
-      AppException::ThrowResourceNotFound("The user with login=$userId does not exist", __METHOD__);
+    $user = $userId ? $this->userRepository->getUserById($userId) : null;
+
+    if ($user) {
+      return $user;
     }
+
+    AppException::ThrowResourceNotFound("The user with id=$userId does not exist", __METHOD__);
   }
 
   public function checkQues($ques): void
   {
     $errors = [];
+
+    if (!array_key_exists('id', $ques)) {
+      $errors[] = 'phrase Id is not transmitted';
+    }
 
     if (!array_key_exists('en', $ques)) {
       $errors[] = 'phrase En is not transmitted';

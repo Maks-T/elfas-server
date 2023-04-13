@@ -34,17 +34,17 @@ class QuesRepository
 
   /**
    * @param Ques[] $questions
-   * @return bool
+   * @return Ques[] array
    */
-  public function createQuestions(string $userId, array $questions): bool
+  public function createQuestions(string $userId, array $questions): ?array
   {
     $this->setUser($userId);
 
     if ($this->jsonDB->createItems($questions)) {
-      return true;
+      return $questions;
     }
 
-    return false;
+    return null;
   }
 
   /**
@@ -70,7 +70,6 @@ class QuesRepository
     $this->setUser($userId);
 
     return $this->jsonDB->getByField('id', $id);
-
   }
 
   public function updateQuestionById(string $id, string $userId, Ques $question): ?Ques
@@ -78,7 +77,6 @@ class QuesRepository
     $this->setUser($userId);
 
     return $this->jsonDB->updateByField('id', $id, $question);
-
   }
 
   public function deleteQuestionById(string $id): ?Ques
