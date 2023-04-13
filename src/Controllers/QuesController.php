@@ -96,7 +96,7 @@ class QuesController extends Controller
 
     $quesModel = new Ques($quesData);
 
-    $question = $this->quesRepository->updateQuestionById($userId, $quesData['id'], $quesModel);
+    $question = $this->quesRepository->updateQuestionById( $quesData['id'], $userId,$quesModel);
 
     if ($question) {
 
@@ -104,7 +104,7 @@ class QuesController extends Controller
       return;
     }
 
-    AppException::ThrowServiceUnavailable('For some reason, the questions are not created', __METHOD__);
+    AppException::ThrowServiceUnavailable('For some reason, the questions are not updated', __METHOD__);
   }
 
   public function delete(): void
@@ -113,15 +113,15 @@ class QuesController extends Controller
 
     $userId = $this->findUserByData($quesData)->id;
 
-    $user = $this->userRepository->deleteUserById($userId);
-    $this->authRepository->deleteByUserId($userId);
+    $question = $this->quesRepository->deleteQuestionById($quesData['id'], $userId);
 
-    if ($user) {
-      $this->quesService->sendMsgQuestionDeleted($user);
+    if ($question) {
+      $this->quesService->sendMsgQuestionDeleted($question);
+
       return;
     }
 
-    AppException::ThrowResourceNotFound("The user with id=$userId  does not exist", __METHOD__);
+    AppException::ThrowServiceUnavailable('For some reason, the questions are not deleted', __METHOD__);
   }
 
   private function findUserByData($quesData): User

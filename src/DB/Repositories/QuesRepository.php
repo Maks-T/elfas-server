@@ -80,8 +80,10 @@ class QuesRepository
     return $this->jsonDB->updateByField('id', $id, $question);
   }
 
-  public function deleteQuestionById(string $id): ?Ques
+  public function deleteQuestionById(string $id, string $userId): ?Ques
   {
+    $this->setUser($userId);
+
     return $this->jsonDB->deleteByField('id', $id);
   }
 }
