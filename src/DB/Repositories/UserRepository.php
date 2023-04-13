@@ -51,9 +51,6 @@ class UserRepository
 
     if ($findUser) {
 
-      foreach ((array)$findUser as $prop => $value) {
-        echo '$prop = ' . $prop . ' $value = ' . $value . '<br>';
-      }
       $user->name ?? $user->name = $findUser->name;
       $user->login ?? $user->login = $findUser->login;
       $user->email ?? $user->email = $findUser->email;

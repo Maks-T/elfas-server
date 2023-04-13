@@ -31,7 +31,8 @@ class UserController extends Controller
   {
     $userData = $this->request->getData();
 
-    $this->checkUserData($userData);
+    $this->checkUserDataCreate($userData);
+
     if (isset($userData['id'])) {
       unset($userData['id']);
     }
@@ -68,15 +69,22 @@ class UserController extends Controller
 
   public function update(): void
   {
-    //ToDo prohibit updating without a password
+    //ToDo prohibit updating without a password or publickKey
 
     $userData = $this->request->getData();
 
     $userFinded = $this->findUserByData($userData);
 
     if ($userFinded) {
-      $this->checkUserData($userData);
-      $user = $this->userRepository->updateUserById($userFinded->id, $userFinded);
+      $this->checkUserDataUpdate($userData);
+
+      $userData['login'] = $userData['login'] ?? $userFinded->login;
+      $userData['name'] = $userData['name'] ?? $userFinded->name;
+      $userData['email'] = $userData['email'] ?? $userFinded->email;
+      $userData['password'] = $userData['password'] ?? $userFinded->password;
+
+      $userModel = new User($userData);
+      $user = $this->userRepository->updateUserById($userFinded->id, $userModel);
 
       if ($user) {
         $this->userService->sendMsgUserUpdated($user);
@@ -89,6 +97,8 @@ class UserController extends Controller
 
   public function delete(): void
   {
+    //ToDo prohibit updating without a password or publickKey
+
     $userData = $this->request->getData();
 
     $userId = $this->findUserByData($userData)->id;
@@ -121,9 +131,63 @@ class UserController extends Controller
     AppException::ThrowResourceNotFound("The user with id=$userId does not exist", __METHOD__);
   }
 
-  private function checkUserData($data): void
+  private function checkUserDataUpdate($data): void
   {
     $errors = [];
+
+    //Check clientKey
+    if (!isset($data['clientKey'])) {
+      $errors['clientKey'] = 'clientKey is not transmitted';
+    }
+
+    //Check login
+    if (isset($data['login']) && (strlen($data['login']) < 6)) {
+      $errors['login'] = 'Login is empty or its length is less than 6 characters';
+    }
+
+    //check password
+    if (isset($data['password']) &&  (strlen($data['password']) < 3)) {
+      $errors['password'] = 'Password is empty or its length is less than 3 characters';
+    }/* else {
+      $regexPassword = '/(?:[а-яёa-z]\d|\d[в-яёa-z])/i';
+
+      if (!preg_match($regexPassword, $data['password'])) {
+        $errors['password'] = 'Your password must contain both letters and numbers';
+      }
+    }*/
+
+    //check email
+    $regexEmail = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
+
+    if (isset($data['email']) &&  !preg_match($regexEmail, strtolower($data['email']))) {
+      $errors['email'] = 'Email is invalid';
+    }
+
+    //check name
+    if (isset($data['name']) &&  (strlen($data['name']) < 2)) {
+      $errors['name'] = 'The name must contain at least two letters';
+    } else {
+      $regexName = '/^[a-zA-Z-\s]+$/';
+
+      if (!preg_match($regexName, $data['name'])) {
+
+        $errors['name'] = 'The name must contain only letters';
+      }
+    }
+
+    if (count($errors)) {
+      AppException::ThrowBadRequest($errors, __METHOD__);
+    }
+  }
+
+  private function checkUserDataCreate($data): void
+  {
+    $errors = [];
+
+    //Check clientKey
+    if (!isset($data['clientKey'])) {
+      $errors['clientKey'] = 'clientKey is not transmitted';
+    }
 
     //Check login
     if (!isset($data['login']) || (strlen($data['login']) < 6)) {
