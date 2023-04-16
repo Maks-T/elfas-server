@@ -11,15 +11,13 @@ class LearnRepository
 {
   const DIR_PATH = STORE . 'DataUsers/';
 
-  const FILE_NAME = '/learn.json';
+  protected string $fileName = '/learn.json';
 
-  private JsonDb $jsonDB;
+  protected JsonDb $jsonDB;
 
-  private ?string $curUserId = null;
+  protected ?string $curUserId = null;
 
-  public function __construct()
-  {
-  }
+  protected $sortFn = null;
 
   public function setUser(string $userId): LearnRepository
   {
@@ -28,7 +26,7 @@ class LearnRepository
         mkdir(self::DIR_PATH . $userId, 0777, true);
       }
 
-      $this->jsonDB = new JsonDB(self::DIR_PATH . $userId . self::FILE_NAME, Learn::class);
+      $this->jsonDB = new JsonDB(self::DIR_PATH . $userId . $this->fileName, Learn::class, $this->sortFn);
       $this->curUserId = $userId;
     }
 

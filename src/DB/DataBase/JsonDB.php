@@ -15,9 +15,15 @@ class JsonDB
   /** @var object[] $items */
   private array $items = [];
 
-  public function __construct(string $path, string $class)
+  /**
+   * @var callable|null sort function
+   */
+  private $sortFn;
+
+  public function __construct(string $path, string $class, ?callable $sortFn = null)
   {
     $this->path = $path;
+    $this->sortFn = $sortFn;
 
     if (file_exists($this->path)) {
       $json = file_get_contents($this->path);
@@ -26,6 +32,10 @@ class JsonDB
       foreach ($itemsJson as $itemJson) {
 
         $this->items[] = new $class((array)$itemJson);
+      }
+
+      if ($this->sortFn) {
+        usort($this->items, $this->sortFn);
       }
     }
   }
@@ -120,8 +130,13 @@ class JsonDB
     return null;
   }
 
-  public function saveItemsToFile(string $methodCustomer)
+
+  private function saveItemsToFile(string $methodCustomer)
   {
+    if ($this->sortFn) {
+      usort($this->items, $this->sortFn);
+    }
+
     try {
       $json = json_encode($this->items, JSON_UNESCAPED_UNICODE);
       file_put_contents($this->path, $json, JSON_UNESCAPED_UNICODE);

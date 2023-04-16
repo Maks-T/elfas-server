@@ -65,6 +65,8 @@ class QuesController extends Controller
 
     $questions = $this->quesRepository->createQuestions($userId, $quesModels);
     $learnQuestions = $this->learnRepository->createLearnQuestions($userId, $leanQuesModels);
+    $rR = new \Elfas\DB\Repositories\RepeatRepository();
+    $rR->createLearnQuestions($userId, $leanQuesModels);
 
     if ($questions && $learnQuestions) {
 
