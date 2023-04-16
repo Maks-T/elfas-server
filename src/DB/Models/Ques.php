@@ -22,6 +22,8 @@ class Ques
 
   public ?string $level = null;
 
+  public string $dateCreated;
+
   public function __construct(array $quesData)
   {
 
@@ -36,5 +38,7 @@ class Ques
     $this->tr = $quesData['tr'] ?? null;
     $this->audioSrc = $quesData['audioSrc'] ?? null;
     $this->audioSrc = $quesData['level'] ?? null;
+    $this->dateCreated = $quesData['level']  ?? date("F j, Y, g:i a");
+
   }
 }

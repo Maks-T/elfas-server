@@ -14,7 +14,7 @@ use Elfas\Router;
 
 $_SERVER['REQUEST_URI'] = str_replace('/elfas-server', '', $_SERVER['REQUEST_URI']);
 
-new AppException(); //creating an instance of an error handler
+//new AppException(); //creating an instance of an error handler
 
 new App();
 

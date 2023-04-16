@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Elfas\Controllers;
 
+use Elfas\DB\Models\Learn;
 use Elfas\DB\Models\User;
 use Elfas\DB\Models\Ques;
 use Elfas\DB\Repositories\QuesRepository;
+use Elfas\DB\Repositories\LearnRepository;
 use Elfas\DB\Repositories\AuthRepository;
 use Elfas\DB\Repositories\UserRepository;
 use Elfas\Exceptions\AppException;
@@ -19,6 +21,8 @@ class QuesController extends Controller
 
   private QuesRepository $quesRepository;
 
+  private LearnRepository $learnRepository;
+
   private AuthRepository $authRepository;
 
   private UserRepository $userRepository;
@@ -28,6 +32,7 @@ class QuesController extends Controller
     parent::__construct();
     $this->quesService = new QuesService();
     $this->quesRepository = new QuesRepository();
+    $this->learnRepository = new LearnRepository();
     $this->authRepository = new AuthRepository();
     $this->userRepository = new UserRepository();
   }
@@ -39,6 +44,7 @@ class QuesController extends Controller
     $userId = $this->findUserByData($quesData)->id;
 
     $quesModels = [];
+    $leanQuesModels = [];
 
     $this->checkQuesData($quesData);
 
@@ -51,12 +57,16 @@ class QuesController extends Controller
         unset($ques['id']);
       }
 
-      $quesModels[] = new Ques($ques);
+      $quesModel = new Ques($ques);
+
+      $quesModels[] =  $quesModel;
+      $leanQuesModels[] = new Learn(['id' =>  $quesModel->id]);
     }
 
     $questions = $this->quesRepository->createQuestions($userId, $quesModels);
+    $learnQuestions = $this->learnRepository->createLearnQuestions($userId, $leanQuesModels);
 
-    if ($questions) {
+    if ($questions && $learnQuestions) {
 
       $this->quesService->sendMsgQuestionsCreated($questions);
       return;

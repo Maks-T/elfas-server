@@ -22,11 +22,11 @@ class QuesRepository
   public function setUser(string $userId): QuesRepository
   {
     if ($this->curUserId !== $userId) {
-      if (!is_dir(self::DIR_PATH)) {
-        mkdir(self::DIR_PATH);
+      if (!is_dir(self::DIR_PATH . $userId)) {
+        mkdir(self::DIR_PATH . $userId, 0777, true);
       }
 
-      $this->jsonDB = new JsonDB(self::DIR_PATH . $userId . '.json', Ques::class);
+      $this->jsonDB = new JsonDB(self::DIR_PATH . $userId . '/questions.json', Ques::class);
       $this->curUserId = $userId;
     }
     return $this;
