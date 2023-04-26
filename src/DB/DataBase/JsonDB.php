@@ -97,20 +97,29 @@ class JsonDB
     return null;
   }
 
-  public function updateByField(string $field, string $value, object $item): ?object
-  {
 
-    foreach ($this->items as $index => $itemFind) {
-      if (isset($itemFind->$field)) {
-        if ($itemFind->$field == $value) {
-          $this->items[$index] = $item;
-          $this->saveItemsToFile(__METHOD__);
-          return $item;
+  /**
+   * @param  string[] $field
+   * @param  mixed $values
+   * @param  object[] $items
+   * @return object[]
+   */
+  public function updateByFields(string $field, array $values, array $items): bool
+  {
+    try {
+      foreach ($this->items as $index => $itemFind) {
+        if (isset($itemFind->$field)) {
+          foreach ($values as $value) {
+            if ($itemFind->$field == $value) {
+              $this->items[$index] = $items[$index];
+            }
+          }
         }
       }
+      return true;
+    } catch (\Error $e) {
+      return false;
     }
-
-    return null;
   }
 
   public function deleteByField(string $field, string $value): ?object

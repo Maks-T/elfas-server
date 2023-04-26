@@ -17,4 +17,6 @@ class RepeatRepository extends LearnRepository
     $this->sortFn = fn(Learn $a, Learn $b) => strtotime($a->dateRevise) - strtotime($b->dateRevise);
   }
 
+  public function 
+
 }
